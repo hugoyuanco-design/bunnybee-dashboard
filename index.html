@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>bunnybee.vs｜營運儀表板</title>
+<style>
+  :root {
+    --bg: #f6f3ef;
+    --bg2: #fffdf9;
+    --ink: #1c1917;
+    --muted: #78716c;
+    --line: #e7e0d8;
+    --card: #ffffff;
+    --accent: #c45c26;
+    --accent-soft: #f3e0d4;
+    --good: #166534;
+    --good-bg: #dcfce7;
+    --warn: #92400e;
+    --warn-bg: #fef3c7;
+    --bad: #9f1239;
+    --bad-bg: #ffe4e6;
+    --blue: #1d4ed8;
+    --blue-bg: #dbeafe;
+    --shadow: 0 10px 30px rgba(28, 25, 23, 0.06);
+    --radius: 18px;
+    --font: "PingFang TC", "Noto Sans TC", "Helvetica Neue", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--font);
+    color: var(--ink);
+    background:
+      radial-gradient(1200px 600px at 10% -10%, #fde8d8 0%, transparent 55%),
+      radial-gradient(900px 500px at 100% 0%, #e8f0ff 0%, transparent 50%),
+      var(--bg);
+    line-height: 1.55;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 28px 20px 64px; }
+  header.hero {
+    display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: flex-end;
+    margin-bottom: 24px;
+  }
+  .brand {
+    display: flex; gap: 14px; align-items: center;
+  }
+  .mark {
+    width: 48px; height: 48px; border-radius: 16px;
+    background: linear-gradient(145deg, #c45c26, #e8a87c);
+    box-shadow: var(--shadow);
+    display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 18px;
+  }
+  h1 { margin: 0; font-size: 1.55rem; letter-spacing: -0.02em; }
+  .sub { color: var(--muted); font-size: 0.92rem; margin-top: 4px; }
+  .meta-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill {
+    background: var(--card); border: 1px solid var(--line); border-radius: 999px;
+    padding: 6px 12px; font-size: 0.8rem; color: var(--muted); box-shadow: var(--shadow);
+  }
+  .pill strong { color: var(--ink); font-weight: 600; }
+  .grid { display: grid; gap: 16px; }
+  .kpis { grid-template-columns: repeat(4, 1fr); margin-bottom: 8px; }
+  @media (max-width: 900px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 520px) { .kpis { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 18px 18px 16px;
+  }
+  .kpi .label { font-size: 0.78rem; color: var(--muted); letter-spacing: 0.02em; }
+  .kpi .value { font-size: 1.7rem; font-weight: 700; letter-spacing: -0.03em; margin-top: 4px; }
+  .kpi .hint { font-size: 0.78rem; color: var(--muted); margin-top: 6px; }
+  .section-title {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+    margin: 28px 0 12px;
+  }
+  .section-title h2 { margin: 0; font-size: 1.15rem; }
+  .section-title span { color: var(--muted); font-size: 0.82rem; }
+  .two-col { grid-template-columns: 1.4fr 1fr; }
+  @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+  .post {
+    display: grid; gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--line);
+  }
+  .post:last-child { border-bottom: 0; padding-bottom: 0; }
+  .post:first-child { padding-top: 0; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.72rem; font-weight: 600; padding: 3px 9px; border-radius: 999px;
+  }
+  .badge.good { background: var(--good-bg); color: var(--good); }
+  .badge.warn { background: var(--warn-bg); color: var(--warn); }
+  .badge.neutral { background: #f5f5f4; color: #57534e; }
+  .badge.blue { background: var(--blue-bg); color: var(--blue); }
+  .post-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+  .post-title { font-weight: 700; font-size: 1.02rem; margin: 0; }
+  .metrics {
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px;
+  }
+  @media (max-width: 640px) { .metrics { grid-template-columns: repeat(2, 1fr); } }
+  .m {
+    background: var(--bg2); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px;
+  }
+  .m .n { font-weight: 700; font-size: 1.15rem; }
+  .m .l { font-size: 0.72rem; color: var(--muted); }
+  .bar-row { display: grid; grid-template-columns: 72px 1fr 42px; gap: 8px; align-items: center; font-size: 0.8rem; margin-top: 6px; }
+  .bar {
+    height: 8px; background: #f0ebe4; border-radius: 999px; overflow: hidden;
+  }
+  .bar > i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #c45c26, #e8a87c); }
+  .bar.blue > i { background: linear-gradient(90deg, #1d4ed8, #93c5fd); }
+  .bar.green > i { background: linear-gradient(90deg, #166534, #86efac); }
+  .excerpt {
+    margin: 0; color: var(--muted); font-size: 0.88rem;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 0.75rem; text-transform: none; }
+  tr:hover td { background: #fffaf5; }
+  .num { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .list { margin: 0; padding-left: 18px; color: var(--ink); }
+  .list li { margin: 6px 0; }
+  .muted { color: var(--muted); }
+  .note {
+    background: var(--accent-soft); border: 1px solid #ecc9b0; border-radius: 14px;
+    padding: 12px 14px; font-size: 0.88rem;
+  }
+  footer {
+    margin-top: 28px; color: var(--muted); font-size: 0.78rem; text-align: center;
+  }
+  .chart {
+    display: grid; gap: 10px; align-items: end;
+    grid-template-columns: repeat(4, 1fr);
+    min-height: 160px; padding-top: 8px;
+  }
+  .col { display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; justify-content: flex-end; }
+  .col .stack { width: 100%; max-width: 56px; display: flex; flex-direction: column; justify-content: flex-end; height: 140px; gap: 4px; }
+  .col .views {
+    background: linear-gradient(180deg, #e8a87c, #c45c26); border-radius: 10px 10px 4px 4px;
+    width: 100%;
+  }
+  .col .profile {
+    background: #86efac; border-radius: 4px; width: 100%; min-height: 0;
+  }
+  .col .lab { font-size: 0.72rem; color: var(--muted); text-align: center; line-height: 1.25; }
+  .col .val { font-size: 0.78rem; font-weight: 700; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.78rem; color: var(--muted); margin-top: 10px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <div class="brand">
+        <div class="mark">b</div>
+        <div>
+          <h1>bunnybee.vs 營運儀表板</h1>
+          <div class="sub">每日復盤 × 已發文章 × 數據對焦｜Asia/Taipei</div>
+        </div>
+      </div>
+      <div class="meta-pills">
+        <div class="pill">資料日 <strong>2026-09-28</strong></div>
+        <div class="pill">帳號 <strong>@bunnybee.vs</strong></div>
+        <div class="pill">佣金 <strong>仕修</strong></div>
+        <div class="pill">數字性質 <strong>初值（未滿 24h）</strong></div>
+      </div>
+    </header>
+
+    <div class="grid kpis">
+      <div class="card kpi">
+        <div class="label">今日發文</div>
+        <div class="value">2</div>
+        <div class="hint">18:00／20:00 無備稿跳過</div>
+      </div>
+      <div class="card kpi">
+        <div class="label">今日瀏覽合計</div>
+        <div class="value">163</div>
+        <div class="hint">洗衣精 99 + 除濕袋 64</div>
+      </div>
+      <div class="card kpi">
+        <div class="label">檔案造訪</div>
+        <div class="value">11</div>
+        <div class="hint">幾乎全來自洗衣精文</div>
+      </div>
+      <div class="card kpi">
+        <div class="label">海巡則數</div>
+        <div class="value">8</div>
+        <div class="hint">達標 5–10｜附比較文 3</div>
+      </div>
+    </div>
+
+    <div class="section-title">
+      <h2>今日主文表現</h2>
+      <span>約 21:50 抓取｜初值</span>
+    </div>
+    <div class="grid two-col">
+      <div class="card">
+        <article class="post">
+          <div class="post-head">
+            <h3 class="post-title">洗衣精大牌四款｜情境清單</h3>
+            <span class="badge good">相對最好 · 留＋加碼</span>
+          </div>
+          <p class="excerpt">新北連下很多天雨，洗衣服真的很崩潰——洗了不能曬、房間一晾就悶。洗衣精不是一款打天下… ARIEL／Attack／Persil／橘子四款分情境選。</p>
+          <div class="metrics">
+            <div class="m"><div class="n">99</div><div class="l">瀏覽</div></div>
+            <div class="m"><div class="n">76</div><div class="l">觀看人數</div></div>
+            <div class="m"><div class="n">11</div><div class="l">檔案造訪</div></div>
+            <div class="m"><div class="n">23%</div><div class="l">搜尋占比</div></div>
+          </div>
+          <div>
+            <div class="bar-row"><span>首頁</span><div class="bar"><i style="width:75.56%"></i></div><span>76%</span></div>
+            <div class="bar-row"><span>搜尋</span><div class="bar blue"><i style="width:23.33%"></i></div><span>23%</span></div>
+            <div class="bar-row"><span>檔案</span><div class="bar green"><i style="width:1.11%"></i></div><span>1%</span></div>
+          </div>
+          <div class="muted" style="font-size:0.82rem">
+            讚 0｜回覆 1｜轉發／引用／分享 0　·　
+            <a href="https://www.threads.com/@bunnybee.vs/post/Dd0JyUTFDKP" target="_blank" rel="noopener">開主文</a>
+            ·
+            <a href="https://www.threads.com/@bunnybee.vs/post/Dd0J1t6FAYI" target="_blank" rel="noopener">連結留言</a>
+          </div>
+        </article>
+
+        <article class="post">
+          <div class="post-head">
+            <h3 class="post-title">除濕袋三款｜決策指南</h3>
+            <span class="badge warn">偏弱 · 建議改</span>
+          </div>
+          <p class="excerpt">是不是有人還在用除濕袋？家裡潮到要發瘋… 先分掛袋／盒裝／大包裝補充，再決定要不要升級機器。</p>
+          <div class="metrics">
+            <div class="m"><div class="n">64</div><div class="l">瀏覽</div></div>
+            <div class="m"><div class="n">57</div><div class="l">觀看人數</div></div>
+            <div class="m"><div class="n">0</div><div class="l">檔案造訪</div></div>
+            <div class="m"><div class="n">4.7%</div><div class="l">搜尋占比</div></div>
+          </div>
+          <div>
+            <div class="bar-row"><span>首頁</span><div class="bar"><i style="width:89.06%"></i></div><span>89%</span></div>
+            <div class="bar-row"><span>檔案</span><div class="bar green"><i style="width:6.25%"></i></div><span>6%</span></div>
+            <div class="bar-row"><span>搜尋</span><div class="bar blue"><i style="width:4.69%"></i></div><span>5%</span></div>
+          </div>
+          <div class="muted" style="font-size:0.82rem">
+            讚 0｜回覆 1｜轉發／引用／分享 0　·　
+            <a href="https://www.threads.com/@bunnybee.vs/post/Dd0h0tkFB_x" target="_blank" rel="noopener">開主文</a>
+            ·
+            <a href="https://www.threads.com/@bunnybee.vs/post/Dd0h9jHlPvF" target="_blank" rel="noopener">連結留言</a>
+          </div>
+        </article>
+      </div>
+
+      <div class="card">
+        <h3 style="margin:0 0 8px;font-size:1rem">區間瀏覽對照（冷啟動～今日）</h3>
+        <p class="muted" style="margin:0 0 12px;font-size:0.82rem">欄高依瀏覽；綠色小段＝檔案造訪（有才顯示）</p>
+        <div class="chart" aria-hidden="true">
+          <div class="col">
+            <div class="val">207</div>
+            <div class="stack">
+              <div class="views" style="height:100%"></div>
+            </div>
+            <div class="lab">09-15<br>除濕經驗</div>
+          </div>
+          <div class="col">
+            <div class="val">19</div>
+            <div class="stack">
+              <div class="views" style="height:9%"></div>
+            </div>
+            <div class="lab">09-17<br>洗碗錠</div>
+          </div>
+          <div class="col">
+            <div class="val">99</div>
+            <div class="stack">
+              <div class="profile" style="height:8%"></div>
+              <div class="views" style="height:48%"></div>
+            </div>
+            <div class="lab">09-28<br>洗衣精</div>
+          </div>
+          <div class="col">
+            <div class="val">64</div>
+            <div class="stack">
+              <div class="views" style="height:31%"></div>
+            </div>
+            <div class="lab">09-28<br>除濕袋</div>
+          </div>
+        </div>
+        <div class="legend">
+          <span><i style="background:#c45c26"></i>瀏覽</span>
+          <span><i style="background:#86efac"></i>檔案造訪（洗衣精 11）</span>
+        </div>
+        <div class="note" style="margin-top:16px">
+          <strong>一句判讀：</strong>情境清單（洗衣精）有搜尋＋檔案造訪，比決策指南與純問句更值得續作。互動全線仍近零，要靠海巡帶流與發後守線。
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">
+      <h2>已發文章總表</h2>
+      <span>09-15 ～ 09-28</span>
+    </div>
+    <div class="card" style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>日期</th>
+            <th>題／文型</th>
+            <th>瀏覽</th>
+            <th>觀看</th>
+            <th>檔案</th>
+            <th>訊號</th>
+            <th>連結</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>09-15</td>
+            <td>小品牌除濕／噪音經驗<br><span class="muted">討論問句｜無聯盟連結</span></td>
+            <td class="num">207</td>
+            <td class="num">183</td>
+            <td class="num">0</td>
+            <td><span class="badge neutral">有曝光、零互動</span></td>
+            <td><a href="https://www.threads.com/@bunnybee.vs/post/DdSdAacAEMB" target="_blank" rel="noopener">開文</a></td>
+          </tr>
+          <tr>
+            <td>09-17</td>
+            <td>洗碗錠四款比較<br><span class="muted">清單｜早期樣本</span></td>
+            <td class="num">19</td>
+            <td class="num">10</td>
+            <td class="num">0</td>
+            <td><span class="badge neutral">樣本小</span></td>
+            <td><a href="https://www.threads.com/@bunnybee.vs/post/DdXjhFngNA7" target="_blank" rel="noopener">開文</a></td>
+          </tr>
+          <tr>
+            <td>09-28</td>
+            <td>洗衣精大牌四款<br><span class="muted">情境清單｜初值</span></td>
+            <td class="num">99</td>
+            <td class="num">76</td>
+            <td class="num">11</td>
+            <td><span class="badge good">相對最好</span></td>
+            <td><a href="https://www.threads.com/@bunnybee.vs/post/Dd0JyUTFDKP" target="_blank" rel="noopener">開文</a></td>
+          </tr>
+          <tr>
+            <td>09-28</td>
+            <td>除濕袋三款<br><span class="muted">決策指南｜初值</span></td>
+            <td class="num">64</td>
+            <td class="num">57</td>
+            <td class="num">0</td>
+            <td><span class="badge warn">弱轉化</span></td>
+            <td><a href="https://www.threads.com/@bunnybee.vs/post/Dd0h0tkFB_x" target="_blank" rel="noopener">開文</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-title">
+      <h2>今日復盤重點</h2>
+      <span>含週一建議</span>
+    </div>
+    <div class="grid two-col">
+      <div class="card">
+        <h3 style="margin:0 0 8px;font-size:1rem">發生了什麼</h3>
+        <ul class="list">
+          <li>發了 2 則；12:00 例行未跑；18:00／20:00 因連結庫無第 3 組跳過。</li>
+          <li>海巡 8 則達標，其中 3 則附自己比較文＋原因。</li>
+          <li>三窗正式日更自 <strong>2026-09-29</strong>；上午一次備齊 3 組短連結再開窗。</li>
+        </ul>
+        <h3 style="margin:16px 0 8px;font-size:1rem">明日一個調整</h3>
+        <div class="note">上午一次產完 3 組仕修短連結進庫 → 開 12／18／20；題優先洗碗／洗衣機臭／除濕對決，不連發同品類。</div>
+      </div>
+      <div class="card">
+        <h3 style="margin:0 0 8px;font-size:1rem">下週預設方向</h3>
+        <ol class="list">
+          <li><strong>洗碗錠／洗碗機耗材</strong>清單或對決（預設 #1，除非否決）</li>
+          <li>洗衣機臭／室內晾短句觀點＋掛既有洗衣精文</li>
+          <li>除濕：掛袋 vs 小台對決（改寫今日決策指南弱點）</li>
+        </ol>
+        <h3 style="margin:16px 0 8px;font-size:1rem">情報採用</h3>
+        <ul class="list">
+          <li>發後 30～60 分守線回覆</li>
+          <li>海巡改痛點詞為主（洗衣機臭、室內晾、衣櫃潮、洗碗殘渣）</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section-title">
+      <h2>今日海巡快覽</h2>
+      <span>8 則 · 15:38–16:04</span>
+    </div>
+    <div class="card" style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr><th>#</th><th>主題</th><th>對象</th><th>附比較文</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>洗烘／低泡淡香</td><td><a href="https://www.threads.com/@nzonebiz/post/DdbUvX5DzOy" target="_blank" rel="noopener">@nzonebiz</a></td><td>洗衣精四款</td></tr>
+          <tr><td>2</td><td>洗衣機隔夜臭</td><td><a href="https://www.threads.com/@mumm___wuwu/post/Dd0nV3VIHM8" target="_blank" rel="noopener">@mumm___wuwu</a></td><td>—</td></tr>
+          <tr><td>3</td><td>小空間除濕袋</td><td><a href="https://www.threads.com/@delightful_everyday_7777/post/Ddy8OuPDeSN" target="_blank" rel="noopener">@delightful…</a></td><td>除濕袋三款</td></tr>
+          <tr><td>4</td><td>房間不潮衣櫃濕</td><td><a href="https://www.threads.com/@searchseahappy/post/Ddy-vEBieFo" target="_blank" rel="noopener">@searchseahappy</a></td><td>—</td></tr>
+          <tr><td>5</td><td>日照少室內晾異味</td><td><a href="https://www.threads.com/@melody_think/post/Dd0g05FEhsp" target="_blank" rel="noopener">@melody_think</a></td><td>洗衣精四款</td></tr>
+          <tr><td>6</td><td>除臭石反臭</td><td><a href="https://www.threads.com/@feiwenwang5566/post/DdzLByUe_Cx" target="_blank" rel="noopener">@feiwenwang5566</a></td><td>—</td></tr>
+          <tr><td>7</td><td>手洗改機洗仍臭</td><td><a href="https://www.threads.com/@guan1004/post/DdzGYmek7JB" target="_blank" rel="noopener">@guan1004</a></td><td>—</td></tr>
+          <tr><td>8</td><td>柔軟精灰塵味</td><td><a href="https://www.threads.com/@waslygsssdnr/post/Dd0rYoOk96v" target="_blank" rel="noopener">@waslygsssdnr</a></td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-title">
+      <h2>文章全文（方便對焦）</h2>
+      <span>可點展開閱讀</span>
+    </div>
+    <div class="card">
+      <details open>
+        <summary><strong>09-28｜洗衣精大牌四款</strong> <span class="badge blue">今日</span></summary>
+        <p style="white-space:pre-wrap;font-size:0.9rem;margin:12px 0 0">新北連下很多天雨，洗衣服真的很崩潰——洗了不能曬、房間一晾就悶。
+
+洗衣精不是一款打天下。不同狀況，我會選不一樣的：
+
+ARIEL 室內晾衣（綠瓶）：以前租屋沒陽台可用、只能掛房間時我買過。掛兩天悶味比較沒那麼搶；香味偏有存在感，敏感的人可能要少倒。特別適合租屋族室內晾——付的是「房間晾比較不會悶臭」這件事。
+
+一匙靈 Attack 強力消臭：夏天洗衣機洗運動衣、毛巾，隔天還臭最崩。洗完隔天再聞，比較不像「洗了還臭」；不是無香，是消臭感比較明顯。付的是「汗臭有被壓住」的感覺。
+
+Persil 寶瀅強效淨垢凝露：白T領口袖口黃、沒時間預泡時我試過。凝露用量省，斑漬比較有感；味道兩極。付的是「斑漬一次比較有感、用量省」這條。
+
+橘子工坊低敏親膚：想少香精、走 MIT、貼身衣物不想一股化學香時用。單價通常高一截，我家不當唯一款，是另外備的那款。付的是「少香精、貼身比較安心」這件事。
+
+你最近比較常：房間晾、汗臭，還是斑漬／少香精？
+連結放留言。</p>
+      </details>
+      <hr style="border:none;border-top:1px solid var(--line);margin:16px 0" />
+      <details>
+        <summary><strong>09-28｜除濕袋三款</strong> <span class="badge blue">今日</span></summary>
+        <p style="white-space:pre-wrap;font-size:0.9rem;margin:12px 0 0">是不是有人還在用除濕袋？家裡潮到要發瘋，又覺得先買大台除濕太兇。
+
+我會先分三種放法，再決定要不要升級機器：
+
+1）掛袋型：衣櫃、鞋盒、小密閉空間。換袋頻率看潮氣，優點是不佔地板。
+2）盒裝型：抽屜、書櫃、床底。比較穩、比較不好忘在角落。
+3）大包裝補充：已經確定要用耗材路線的，先比「單包能撐多久」跟「丟了會不會很痛」。
+
+除濕袋救的是「局部密閉」，救不了整間房對開窗還是潮。若開完還悶，那是公升數／擺位問題，不是再多丟兩包就會好。
+
+你現在卡的是衣櫃潮，還是整間房都悶？
+連結放留言。</p>
+      </details>
+      <hr style="border:none;border-top:1px solid var(--line);margin:16px 0" />
+      <details>
+        <summary><strong>09-17｜洗碗錠四款比較</strong></summary>
+        <p style="white-space:pre-wrap;font-size:0.9rem;margin:12px 0 0">洗碗錠比較：finish、Dalli、ecostore、橘子工坊四款怎麼選
+
+不是因為都天然，是四種買法：
+1. 主流好買 → finish 亮碟經典洗碗塊（官方）
+2. 平價德系先試 → Dalli 達麗全效洗碗錠
+3. 無香精少添加 → ecostore 宜可誠純淨無香
+4. MIT／酵素／親子 → 橘子工坊三合一酵素
+
+…（完整稿見 workspace 已發檔）</p>
+        <p class="muted" style="font-size:0.82rem"><a href="https://www.threads.com/@bunnybee.vs/post/DdXjhFngNA7" target="_blank" rel="noopener">開 Threads 主文</a></p>
+      </details>
+      <hr style="border:none;border-top:1px solid var(--line);margin:16px 0" />
+      <details>
+        <summary><strong>09-15｜小品牌除濕經驗問句</strong></summary>
+        <p style="white-space:pre-wrap;font-size:0.9rem;margin:12px 0 0">我買過一台除濕機，當時選了比較小眾、價格好看的牌子。
+用一陣子之後噪音愈來愈明顯，才開始猶豫：是要繼續忍，還是早點換。
+
+後來比較有感的是——耐不耐用，常常跟品牌／做工比較有關。
+便宜當下是省到了，但噪音、維修、你還願不願意天天開，加總起來不一定划算。
+
+不是說小品牌一定雷，只是我會多問：這台我能接受它陪我幾年嗎？出問題時好不好找人修？
+
+有沒有人也是當下買了覺得很便宜，用了才發現根本是貴的？</p>
+      </details>
+    </div>
+
+    <footer>
+      資料來源：bunnybee.vs-每日復盤／貼文數據與優化／週復盤／海巡日誌／已發稿（2026-09-28）· 單檔離線可開 · 之後每日復盤可覆寫更新此頁
+    </footer>
+  </div>
+</body>
+</html>

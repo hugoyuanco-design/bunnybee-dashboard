@@ -1,324 +1,105 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>bunnybee.vs｜營運儀表板</title>
-<style>
-  :root {
-    --bg: #f6f3ef;
-    --bg2: #fffdf9;
-    --ink: #1c1917;
-    --muted: #78716c;
-    --line: #e7e0d8;
-    --card: #ffffff;
-    --accent: #c45c26;
-    --accent-soft: #f3e0d4;
-    --good: #166534;
-    --good-bg: #dcfce7;
-    --warn: #92400e;
-    --warn-bg: #fef3c7;
-    --bad: #9f1239;
-    --bad-bg: #ffe4e6;
-    --blue: #1d4ed8;
-    --blue-bg: #dbeafe;
-    --shadow: 0 10px 30px rgba(28, 25, 23, 0.06);
-    --radius: 18px;
-    --font: "PingFang TC", "Noto Sans TC", "Helvetica Neue", sans-serif;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: var(--font);
-    color: var(--ink);
-    background:
-      radial-gradient(1200px 600px at 10% -10%, #fde8d8 0%, transparent 55%),
-      radial-gradient(900px 500px at 100% 0%, #e8f0ff 0%, transparent 50%),
-      var(--bg);
-    line-height: 1.55;
-  }
-  a { color: var(--accent); text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  .wrap { max-width: 1120px; margin: 0 auto; padding: 28px 20px 64px; }
-  header.hero {
-    display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: flex-end;
-    margin-bottom: 24px;
-  }
-  .brand { display: flex; gap: 14px; align-items: center; }
-  .mark {
-    width: 48px; height: 48px; border-radius: 16px;
-    background: linear-gradient(145deg, #c45c26, #e8a87c);
-    box-shadow: var(--shadow);
-    display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 18px;
-  }
-  h1 { margin: 0; font-size: 1.55rem; letter-spacing: -0.02em; }
-  .sub { color: var(--muted); font-size: 0.92rem; margin-top: 4px; }
-  .meta-pills { display: flex; flex-wrap: wrap; gap: 8px; }
-  .pill {
-    background: var(--card); border: 1px solid var(--line); border-radius: 999px;
-    padding: 6px 12px; font-size: 0.8rem; color: var(--muted); box-shadow: var(--shadow);
-  }
-  .pill strong { color: var(--ink); font-weight: 600; }
-  .grid { display: grid; gap: 16px; }
-  .kpis { grid-template-columns: repeat(4, 1fr); margin-bottom: 8px; }
-  @media (max-width: 900px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 520px) { .kpis { grid-template-columns: 1fr; } }
-  .card {
-    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
-    box-shadow: var(--shadow); padding: 18px 18px 16px;
-  }
-  .kpi .label { font-size: 0.78rem; color: var(--muted); letter-spacing: 0.02em; }
-  .kpi .value { font-size: 1.7rem; font-weight: 700; letter-spacing: -0.03em; margin-top: 4px; }
-  .kpi .hint { font-size: 0.78rem; color: var(--muted); margin-top: 6px; }
-  .section-title {
-    display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
-    margin: 28px 0 12px;
-  }
-  .section-title h2 { margin: 0; font-size: 1.15rem; }
-  .section-title span { color: var(--muted); font-size: 0.82rem; }
-  .two-col { grid-template-columns: 1.4fr 1fr; }
-  @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
-  .post { display: grid; gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--line); }
-  .post:last-child { border-bottom: 0; padding-bottom: 0; }
-  .post:first-child { padding-top: 0; }
-  .badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-size: 0.72rem; font-weight: 600; padding: 3px 9px; border-radius: 999px;
-  }
-  .badge.good { background: var(--good-bg); color: var(--good); }
-  .badge.warn { background: var(--warn-bg); color: var(--warn); }
-  .badge.neutral { background: #f5f5f4; color: #57534e; }
-  .badge.blue { background: var(--blue-bg); color: var(--blue); }
-  .badge.bad { background: var(--bad-bg); color: var(--bad); }
-  .post-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
-  .post-title { font-weight: 700; font-size: 1.02rem; margin: 0; }
-  .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-  @media (max-width: 640px) { .metrics { grid-template-columns: repeat(2, 1fr); } }
-  .m { background: var(--bg2); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
-  .m .n { font-weight: 700; font-size: 1.15rem; }
-  .m .l { font-size: 0.72rem; color: var(--muted); }
-  .bar-row { display: grid; grid-template-columns: 72px 1fr 42px; gap: 8px; align-items: center; font-size: 0.8rem; margin-top: 6px; }
-  .bar { height: 8px; background: #f0ebe4; border-radius: 999px; overflow: hidden; }
-  .bar > i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #c45c26, #e8a87c); }
-  .bar.blue > i { background: linear-gradient(90deg, #1d4ed8, #93c5fd); }
-  .excerpt {
-    margin: 0; color: var(--muted); font-size: 0.88rem;
-    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
-  }
-  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
-  th { color: var(--muted); font-weight: 600; font-size: 0.75rem; }
-  tr:hover td { background: #fffaf5; }
-  .num { font-variant-numeric: tabular-nums; font-weight: 600; }
-  .list { margin: 0; padding-left: 18px; color: var(--ink); }
-  .list li { margin: 6px 0; }
-  .muted { color: var(--muted); }
-  .note {
-    background: var(--accent-soft); border: 1px solid #ecc9b0; border-radius: 14px;
-    padding: 12px 14px; font-size: 0.88rem;
-  }
-  footer { margin-top: 28px; color: var(--muted); font-size: 0.78rem; text-align: center; }
-  .chart {
-    display: grid; gap: 10px; align-items: end;
-    grid-template-columns: repeat(16, 1fr);
-    min-height: 160px; padding-top: 8px;
-  }
-  .col { display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; justify-content: flex-end; }
-  .col .stack { width: 100%; max-width: 56px; display: flex; flex-direction: column; justify-content: flex-end; height: 140px; gap: 4px; }
-  .col .views {
-    background: linear-gradient(180deg, #e8a87c, #c45c26); border-radius: 10px 10px 4px 4px;
-    width: 100%;
-  }
-  .col .profile { background: #86efac; border-radius: 4px; width: 100%; min-height: 0; }
-  .col .lab { font-size: 0.72rem; color: var(--muted); text-align: center; line-height: 1.25; }
-  .col .val { font-size: 0.78rem; font-weight: 700; }
-  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.78rem; color: var(--muted); margin-top: 10px; }
-  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; }
-</style>
-<style>.tbl{width:100%;border-collapse:collapse;font-size:.86rem}.tbl th,.tbl td{border-bottom:1px solid var(--line);padding:7px 6px;text-align:left;vertical-align:top}.tbl th{color:var(--muted);font-weight:600}details pre{white-space:pre-wrap;font-size:.8rem;background:var(--bg2);padding:12px;border-radius:12px;border:1px solid var(--line)}ul{margin:6px 0 0;padding-left:20px}footer{margin-top:32px;color:var(--muted);font-size:.8rem;text-align:center}</style>
-</head>
-<body><div class="wrap">
-<header class="hero"><div class="brand"><div class="mark">bb</div><div><h1>bunnybee.vs｜營運儀表板</h1><div class="sub">2026-10-23（五）每日復盤｜暫停後第一篇：剪洗碗錠（第一人稱）</div></div></div>
-<div class="meta-pills"><span class="pill">今日主文 <strong>1</strong></span><span class="pill">連結留言 <strong>1</strong></span><span class="pill">海巡 <strong>0／8</strong>（10-21 有 3）</span><span class="pill">瀏覽 <strong>10</strong>（初值）</span></div></header>
-<div class="grid kpis">
-<div class="card kpi"><div class="label">今日主文</div><div class="value">1</div><div class="hint">10-23 00:36 剪洗碗錠</div></div>
-<div class="card kpi"><div class="label">本篇瀏覽／主頁造訪</div><div class="value">10／21</div><div class="hint">T+21h 初值｜來源首頁 100%</div></div>
-<div class="card kpi"><div class="label">今日海巡</div><div class="value">0／8</div><div class="hint">10-21 實有 3 則（更正）</div></div>
-<div class="card kpi"><div class="label">主頁瀏覽（主頁顯示）</div><div class="value">9,476</div><div class="hint">recent views｜0 followers（10-23 主頁讀）</div></div>
-<div class="card kpi"><div class="label">9/17 起訂單</div><div class="value">7</div><div class="hint">10-18 後台實數</div></div>
-<div class="card kpi"><div class="label">預估分潤</div><div class="value">NT$247</div><div class="hint">ecostore 洗碗粉占 92%</div></div>
-<div class="card kpi"><div class="label">點擊（10/11–10/17）</div><div class="value">5</div><div class="hint">Threads 4、網站 1</div></div>
-<div class="card kpi"><div class="label">帶 sub_id 新鏈</div><div class="value">10＋15</div><div class="hint">10-18 產 10；居家清潔貨架 15</div></div>
-</div>
-<div class="section-title"><h2>今天</h2><span>暫停日・等核准</span></div>
-<div class="card"><ul>
-<li>1 篇主文＋1 則置頂連結留言；0 則海巡。21:35 讀主頁與 Insights</li>
-<li><b>發了</b>：「我家的洗碗錠已經很久沒整顆丟了」第一人稱爆款版，情節取自 PTT 網友心得；貨架 finish 錠／粉、ecostore 無香錠／洗碗粉 4 條</li>
-<li><b>數據</b>（T+21h 初值）：瀏覽 10、觀看 9、讚 0、轉發 0、主頁造訪 21、新追蹤 0；推送偏弱</li>
-<li><b>更正</b>：Replies 分頁顯示 10-21 有 3 則求推薦串海巡（ecostore 洗碗精、Persil、ARIEL 4D），10-17、10-18 各 1；前兩天復盤寫 0 有誤</li>
-</ul></div>
-<div class="section-title"><h2>今日貼文</h2><span>1 篇</span></div>
-<div class="card"><table class="tbl"><tr><th>時間</th><th>題目</th><th>瀏覽／觀看</th><th>讚／回覆／轉發</th><th>主頁造訪</th><th>判讀</th></tr><tr><td>10-23 00:36</td><td><a href="https://www.threads.com/@bunnybee.vs/post/DezbXF7o7_I"><b>剪洗碗錠（第一人稱）</b></a></td><td>10／9（初值）</td><td>0／1（自留言）／0</td><td>21</td><td>推送弱，T+48 再判</td></tr></table></div>
-<div class="section-title"><h2>最近有發文的一週（10-06～10-08，歷史）</h2><span>最後讀數，標初值者 T+24 未補</span></div>
-<div class="card"><div class="chart" style="grid-template-columns:repeat(9,1fr)"><div class='col'><div class='val'>48</div><div class='stack'><div class='views' style='height:19px'></div></div><div class='lab'>10-06<br>A</div></div><div class='col'><div class='val'>320</div><div class='stack'><div class='views' style='height:130px'></div></div><div class='lab'>10-06<br>B</div></div><div class='col'><div class='val'>60</div><div class='stack'><div class='views' style='height:24px'></div></div><div class='lab'>10-06<br>C</div></div><div class='col'><div class='val'>99</div><div class='stack'><div class='views' style='height:40px'></div></div><div class='lab'>10-07<br>A</div></div><div class='col'><div class='val'>61</div><div class='stack'><div class='views' style='height:24px'></div></div><div class='lab'>10-07<br>B</div></div><div class='col'><div class='val'>36</div><div class='stack'><div class='views' style='height:14px'></div></div><div class='lab'>10-07<br>C</div></div><div class='col'><div class='val'>56</div><div class='stack'><div class='views' style='height:22px'></div></div><div class='lab'>10-08<br>A</div></div><div class='col'><div class='val'>132</div><div class='stack'><div class='views' style='height:53px'></div></div><div class='lab'>10-08<br>B</div></div><div class='col'><div class='val'>30</div><div class='stack'><div class='views' style='height:12px'></div></div><div class='lab'>10-08<br>C</div></div></div><div class="legend"><span><i style="background:#c45c26"></i>瀏覽</span></div></div>
-<div class="card" style="margin-top:16px"><table class="tbl"><tr><th>日期</th><th>窗</th><th>題目</th><th>瀏覽／觀看</th><th>主頁造訪</th><th>連結留言瀏覽</th><th>判讀</th></tr><tr><td>10-06</td><td>A</td><td><a href='https://www.threads.com/@bunnybee.vs/post/DeI49vyElu5'>洗碗留香</a></td><td>48／46</td><td>0</td><td>無資料</td><td>停</td></tr><tr><td>10-06</td><td>B</td><td><a href='https://www.threads.com/@bunnybee.vs/post/DeJhoPHkv4C'><b>退租浴室矽利康霉</b></a></td><td><b>320</b>／278</td><td>4</td><td>13</td><td>週冠，角度留</td></tr><tr><td>10-06</td><td>C</td><td><a href='https://www.threads.com/@bunnybee.vs/post/DeJwNa0EjaR'>晾乾才臭票選</a></td><td>~60／45</td><td>13</td><td>無資料</td><td>改</td></tr><tr><td>10-07</td><td>A</td><td><a href='https://www.threads.com/@bunnybee.vs/post/DeLdIMoEsmN'>磁磚縫黑到發亮，還有救嗎</a></td><td>99／90</td><td>40</td><td>4</td><td>除霉暫停</td></tr><tr><td>10-07</td><td>B</td><td><a href='https://www.threads.com/@bunnybee.vs/post/DeMGtkikhHL'>退租窗框溝槽霉</a></td><td>61／53</td><td>0</td><td>3</td><td>除霉暫停</td></tr><tr><td>10-07</td><td>C</td><td><a href='https://www.threads.com/@bunnybee.vs/post/DeMT8sKklGT'>洗衣店為什麼比較香</a></td><td>36／33（初值）</td><td>0</td><td>1</td><td>停</td></tr><tr><td>10-08</td><td>A</td><td><a href='https://www.threads.com/@bunnybee.vs/post/DeOCBB9kufU'>白T領口黃，還有救嗎</a></td><td>56／52</td><td>3</td><td>3</td><td>停（Persil 1%）</td></tr><tr><td>10-08</td><td>B</td><td><a href='https://www.threads.com/@bunnybee.vs/post/DeOrQGHEsBs'><b>租屋洗衣機黑色海苔片</b></a></td><td><b>132</b>／122（初值）</td><td>0</td><td>沒掛</td><td>留＋加碼，分享 3</td></tr><tr><td>10-08</td><td>C</td><td><a href='https://www.threads.com/@bunnybee.vs/post/DeO46-rEuMH'>運動衣一流汗爆臭</a></td><td>30／27（初值）</td><td>0</td><td>1</td><td>停</td></tr></table>
-<p class="muted" style="margin-bottom:0">10-09 起暫停；10-13～10-20 皆 0 發文（10-20 21:45 讀主頁確認最新仍是 10/08）。貼文數字沿用歷史儀表板，未另讀 Insights。</p></div>
-<div class="grid two-col" style="margin-top:16px">
-<div class="card"><h3 style="margin-top:0">文型 留／改／停（10-20）</h3><ul>
-<li><b>留</b>：3～5 選項清單＋自留言貨架；主文不放連結</li>
-<li><b>改</b>：品類 → 居家清潔；寫法 → 爬文綜合心得，照老闆的 Threads 撰文攻略</li>
-<li><b>停</b>：跨品類幫你比；虛構親身口吻；除濕；除霉（未解禁）</li></ul></div>
-<div class="card"><h3 style="margin-top:0">等老闆拍板</h3><ul>
-<li>核准居家清潔 3 篇（爬文版）</li>
-<li>恢復海巡（先洗碗／洗衣求推薦串）——可先於主文單獨放行</li>
-<li>主頁簡介是否從「幫你比」改成居家清潔定位</li></ul></div></div>
-<div class="section-title"><h2>週復盤（10-13～10-19）</h2><span>下週預設 #1</span></div>
-<div class="card"><table class="tbl"><tr><th>項目</th><th>本週</th></tr>
-<tr><td>主文／海巡</td><td class="num">0／0</td></tr>
-<tr><td>新短連結</td><td>10 條（10-18，帶 sub_id）＋居家清潔貨架 15 條</td></tr>
-<tr><td>9/17～10/17 訂單／分潤</td><td>7 單／NT$247.26（ecostore 洗碗粉 3 單 $227.86）</td></tr>
-<tr><td>好</td><td>高佣官方店清潔耗材＋海巡求推薦串＝唯一證實會成交</td></tr>
-<tr><td>差</td><td>1% 低佣品每單 $1–9；舊鏈無 sub_id 只能推定歸因</td></tr></table>
-<ol class="list" style="margin-top:12px">
-<li><span class="badge good">預設</span> 核准後先發「洗碗機耗材怎麼挑」（finish 25%、ecostore 25%），選 Topic、貨架置頂，同日恢復洗碗求推薦海巡</li>
-<li><span class="badge blue">次</span> 洗衣線「室內晾衣酸臭」，Persil／ARIEL 大包裝 13–18%，48h 看點擊</li>
-<li><span class="badge neutral">檔期</span> 雙11 洗碗機囤貨清單，11/4–11/10 提醒一次（7 天歸因），標核價日</li></ol></div>
-<div class="section-title"><h2>明日一個調整</h2><span>2026-10-23（五）</span></div>
-<div class="card"><div class="note">這篇 20 小時只有 10 瀏覽。下個工作日把海巡補回每天 8 則（洗碗／洗衣求推薦串），回覆裡帶到剪錠話題；T+48 重讀本篇，決定洗碗線第二篇要不要照第一人稱寫法。</div></div>
-<div class="section-title"><h2>情報重點</h2><span>聯盟情報 10-19</span></div>
-<div class="card"><ul>
-<li>主題一致比追熱點重要；Topic 主題標籤＋台灣在地社群已上線</li>
-<li>Insights 可看非追蹤者觸及 → 復盤加這欄</li>
-<li>「留言 XX 送你」類誘餌可能降推薦；我們的「型號放留言」可保留</li>
-<li>蝦皮短影音每單上限 NT$100、社群 NT$500（第三方整理，未核）→ 高單價清潔品走 Threads 連結</li></ul></div>
-<div class="section-title"><h2>海巡</h2><span>10-23 0｜10-21 實有 3（更正）</span></div>
-<div class="card">今天 0 則。Replies 分頁顯示 10-21 有 3 則：@2145wallylife 洗碗精文（ecostore 洗碗精）、@ttiyo_1114 好聞洗衣精（Persil）、@2zccyl 洗衣球（ARIEL 4D）；10-17、10-18 各 1 則。</div>
-<div class="section-title"><h2>全文</h2><span>點開展開（週復盤／情報為 10-19 週一版）</span></div>
-<div class="card"><details open><summary>每日復盤 2026-10-23</summary><pre># bunnybee.vs 每日復盤｜2026-10-23（五｜Asia/Taipei）
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>bunnybee.vs｜營運儀表板</title>
+<style>body{margin:0;font-family:"PingFang TC","Noto Sans TC",sans-serif;background:#f6f3ef;color:#1c1917;line-height:1.55}.w{max-width:1080px;margin:auto;padding:24px 18px 60px}a{color:#c45c26}.k{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}.c{background:#fff;border-radius:16px;padding:16px;box-shadow:0 8px 24px rgba(0,0,0,.05);margin:14px 0}.k .c b{font-size:28px;display:block}table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #e7e0d8;padding:6px;text-align:left;font-size:14px}.bar{font-size:13px;margin:4px 0}.bar span{display:inline-block;width:52px}.bar i{display:inline-block;height:10px;border-radius:5px;margin:0 4px}pre{white-space:pre-wrap;font-size:13px;background:#fffdf9;padding:12px;border-radius:10px}summary{cursor:pointer;font-weight:600}</style></head><body><div class="w">
+<h1>bunnybee.vs 營運儀表板</h1><p>更新：2026-10-26 21:45（Asia/Taipei）｜快速測第 1 天｜人設：租屋居家整理員</p>
+<div class="k"><div class="c">今日主文<b>3</b></div><div class="c">今日海巡<b>0／12</b></div><div class="c">本週主文／海巡<b>6／5</b></div><div class="c">recent views<b>9,752</b></div><div class="c">followers<b>0</b></div></div>
+<div class="c"><h2>今日貼文（初值）</h2><table><tr><th>時段／開頭</th><th>貼文</th><th>瀏覽</th></tr><tr><td>12:00 痛點</td><td><a href="https://www.threads.com/@bunnybee.vs/post/De8ZlJ8o0Uw">De8ZlJ8o0Uw</a></td><td>24（T+9h）</td></tr><tr><td>18:00 數字</td><td><a href="https://www.threads.com/@bunnybee.vs/post/De9B7dckqoy">De9B7dckqoy</a></td><td>2（T+3h）</td></tr><tr><td>21:00 反常識</td><td><a href="https://www.threads.com/@bunnybee.vs/post/De9WK-PI0R-">De9WK-PI0R-</a></td><td>剛發</td></tr></table><p>同品類（租屋過冬）、同格式（店家清單）、同貨架 CT01／EB02b／QL01／BS01；共用舊鏈，點擊未分篇。</p></div>
+<div class="c"><h2>本週流量</h2><div class="bar"><span>10-20</span><i style="width:2px;background:#c45c26"></i>0 主文 <i style="width:2px;background:#1d4ed8"></i>0 海巡</div><div class="bar"><span>10-21</span><i style="width:2px;background:#c45c26"></i>0 主文 <i style="width:92px;background:#1d4ed8"></i>3 海巡</div><div class="bar"><span>10-22</span><i style="width:2px;background:#c45c26"></i>0 主文 <i style="width:2px;background:#1d4ed8"></i>0 海巡</div><div class="bar"><span>10-23</span><i style="width:62px;background:#c45c26"></i>1 主文 <i style="width:2px;background:#1d4ed8"></i>0 海巡</div><div class="bar"><span>10-24</span><i style="width:62px;background:#c45c26"></i>1 主文 <i style="width:2px;background:#1d4ed8"></i>0 海巡</div><div class="bar"><span>10-25</span><i style="width:62px;background:#c45c26"></i>1 主文 <i style="width:62px;background:#1d4ed8"></i>2 海巡</div><div class="bar"><span>10-26</span><i style="width:182px;background:#c45c26"></i>3 主文 <i style="width:2px;background:#1d4ed8"></i>0 海巡</div></div>
+<div class="c"><h2>明日調整</h2><p>12:00 前過掉分潤後台滑塊驗證，替 10/27 三篇各產獨立 sub_id；海巡擴到收納／租屋／寢具串。</p><h2>下週預設 #1</h2><p>快速測照跑＋補 sub_id，10/28 起 48 小時砍／加碼。雙11 清單 10/28 置頂。</p></div>
+<div class="c"><h2>海巡</h2><p>今日 0（6 小時內 0 合格串）；1 串待早上批次審。10/25 兩則回覆仍 0 互動。</p></div>
+<div class="c"><h2>全文</h2><details><summary>每日復盤</summary><pre># bunnybee.vs 每日復盤｜2026-10-26（一｜Asia/Taipei）
 
-規定：§7。21:35 用 box 瀏覽器唯讀查看 @bunnybee.vs（顯示名「bunnybee｜幫你比」）：今天有 1 篇新主文；主頁 0 followers、9,476 recent views（昨天 9,458，主頁顯示值）。
+規定：§7。今天是「快速測」第一天（老闆 10/26 11:11 核准，12:00／18:00／21:00 各 1 篇，每篇只改開頭）。數據用 21:05 唯讀讀數，未滿 6 小時的都是初值。主頁 0 followers、9,752 recent views（早上海巡時讀，10/25 為 9,482）。
 
-## 今日發了什麼
-**1 篇主文＋1 則置頂連結留言**（10-09 暫停後第一篇）
-- 00:36〔#洗碗機〕「我家的洗碗錠已經很久沒整顆丟了」——第一人稱爆款版（剪錠、問句收尾），情節取自 PTT 網友心得；主文不放連結
-  https://www.threads.com/@bunnybee.vs/post/DezbXF7o7_I
-- 置頂自留言：Ⅰ～Ⅲ 網友心得＋finish 錠／finish 粉／ecostore 無香錠／ecostore 洗碗粉 4 條連結，標「含聯盟連結」
+## 今日發了什麼（3 篇主文＋各 1 則置頂連結留言）
+| 時段 | 開頭類型 | 連結 | 數據（初值） |
+|---|---|---|---|
+| 12:00 | 痛點 | https://www.threads.com/@bunnybee.vs/post/De8ZlJ8o0Uw | T+9h 瀏覽 24 |
+| 18:00 | 數字 | https://www.threads.com/@bunnybee.vs/post/De9B7dckqoy | T+3h 瀏覽 2 |
+| 21:00 | 反常識 | https://www.threads.com/@bunnybee.vs/post/De9WK-PI0R- | 剛發，未讀 |
 
-## 數據（T+21h，初值）
-瀏覽 10／觀看 9｜讚 0｜回覆 1（自己的置頂）｜轉發 0｜引用 0｜分享 0｜主頁造訪 21（Insights 標 Higher）｜新追蹤 0｜來源首頁 100%｜非追蹤者比例：Insights 未顯示
+三篇同品類（租屋過冬：寢具＋窗簾＋電熱毯）、同格式（店家清單）、同貨架（CT01、EB02b、QL01、BS01），主題標籤「租屋」。讚、回覆、轉發、主頁造訪今天沒逐篇讀到，明天補。
 
 ## 文型 留／改／停
-- **留**：主文不放連結、乾貨＋連結放置頂留言；第一人稱短主文、問句收尾
-- **改**：推送太低（20 小時 10 瀏覽、首頁 100%），光靠主文推不出去，要用海巡把人帶回主頁；Topic 已選「洗碗機」
-- **停**：跨品類「幫你比」；除濕機；除霉（未解禁）
+- **留**：店家清單＋置頂貨架、每篇只改開頭、主題標籤
+- **改**：三篇共用舊鏈（1018a／1018b），分不出哪篇帶點擊；要補獨立 sub_id
+- **停**：暫無（還沒到 48 小時判斷點）
 
 ## 連結留言互動
-置頂留言互動 Insights 未分列；主頁造訪 21 比瀏覽 10 還高，可能是 10-21 海巡回覆帶來的人（推定，未證實）。未讀分潤後台，最新實數仍是 10-18：9/17 起 7 單、預估 NT$247.26。
+置頂留言互動未分列；分潤後台今天卡滑塊驗證，沒讀到點擊。昨天 10/24 有 BS01、QL02 各 1 點擊（分潤成效-daily.csv）。
 
 ## 海巡
-**今日 0**／目標 8。**更正**：Replies 分頁顯示 10-21 有 3 則求推薦串回覆（ecostore 洗碗精、Persil、ARIEL 4D，各掛連結），10-17、10-18 各 1 則；10-21、10-22 復盤寫「0 海巡、Replies 空白」不正確。詳 `bunnybee.vs-海巡日誌-2026-10-23.md`。
+**今日 0／12**（目標 8）：6 小時內清潔類 0 串合格；1 串（浴室清潔劑求推薦，超時約 20 分）放早上批次待審。10/25 的 2 則海巡回覆（洗衣球、貓碗）到今天仍 0 互動。詳 `bunnybee.vs-海巡日誌-2026-10-26.md`。海巡擴到收納／租屋／寢具串從 10/27 起跑。
 
 ## 一個明日調整
-這篇 20 小時只有 10 瀏覽，下個工作日把海巡補回每天 8 則（洗碗／洗衣「求推薦」串），回覆裡帶到這篇的剪錠話題；T+48 再讀一次這篇的瀏覽與主頁造訪，決定洗碗線下一篇要不要照這個第一人稱寫法。
+明天 12:00 前先把分潤後台的滑塊驗證過掉（mini 上老闆登入的 Chrome），替 10/27 三篇各產一條獨立 sub_id（post-1027-清單-問句 等），不然 48 小時判斷只能看瀏覽、看不到點擊。
 
-詳：`bunnybee.vs-貼文數據與優化-2026-10-23.md`
-儀表板：https://hugoyuanco-design.github.io/bunnybee-dashboard/</pre></details><details><summary>貼文數據與優化 2026-10-23</summary><pre># bunnybee.vs 貼文數據與優化｜2026-10-23（五）
+詳：`bunnybee.vs-貼文數據與優化-2026-10-26.md`、`聯盟產文/快速測-紀錄.md`
+儀表板：https://hugoyuanco-design.github.io/bunnybee-dashboard/
+</pre></details><details><summary>貼文數據與優化</summary><pre># bunnybee.vs 貼文數據與優化｜2026-10-26
 
-| 時間 | 題目 | 瀏覽／觀看 | 讚 | 回覆 | 轉發 | 主頁造訪 | 追蹤 | 來源 | 判讀 |
-|---|---|---|---|---|---|---|---|---|---|
-| 10-23 00:36 | [剪洗碗錠（第一人稱）](https://www.threads.com/@bunnybee.vs/post/DezbXF7o7_I) | 10／9（初值 T+21h） | 0 | 1（自留言） | 0 | 21 | 0 | 首頁 100% | 推送弱，觀察到 T+48 |
+| 篇 | 開頭 | 讀取時間 | 經過 | 瀏覽 | 讚／回覆／轉發 | 點擊 |
+|---|---|---|---|---|---|---|
+| De8ZlJ8o0Uw 12:00 | 痛點 | 21:05 | 9h | 24 | 未讀 | 未讀（後台卡驗證） |
+| De9B7dckqoy 18:00 | 數字 | 21:05 | 3h | 2 | 未讀 | 未讀 |
+| De9WK-PI0R- 21:00 | 反常識 | — | 0h | — | — | — |
 
-回覆率 10%、按讚／分享／引用／轉發率皆 0%（Insights 顯示）。非追蹤者比例未顯示。
+參考（舊篇）：10/24 寢具文 De3is6EI5KM T+21h 4 瀏覽；10/23 洗碗錠文 DezbXF7o7_I T+21h 10 瀏覽。12:00 痛點篇 9 小時 24 瀏覽，已是本週主文最高的初值，但離 48 小時 500 瀏覽門檻還很遠。
 
-## 後台實數（沿用 10-18 讀數，今天未重讀）
-- 9/17 起 7 筆訂單，預估分潤 NT$247.26；ecostore 洗碗粉 3 筆 $227.86＝92%
-- 這篇貨架 4 條連結（finish 2、ecostore 2）的點擊：待下次讀點擊報告
+## 優化
+1. 獨立 sub_id：快速測的判斷靠點擊，今天三篇共用舊鏈，明天一定補。
+2. 6／24／48 小時讀數照表填，10/28 12:00 起第一次砍／加碼判斷。
+3. 開頭輪替明天接：問句、租屋情境、改寫網友真實經驗。
+4. 海巡改成收納／租屋／寢具串後，回覆可以順帶接到當天主文的話題。
 
-## 待補數字
-- 本篇 T+48 定稿數
-- 10-21 三則海巡回覆的瀏覽（各自 insights 未開）
-- 10-07、10-08 六篇 T+24 定稿數（仍是初值）
+海巡日誌：`bunnybee.vs-海巡日誌-2026-10-26.md`
+</pre></details><details><summary>週復盤</summary><pre># bunnybee.vs 週復盤｜2026-10-26（週一｜給老闆）
 
-## 優化方向
-- 居家清潔、高佣官方店優先：finish 25%、ecostore 洗碗精／噴霧 25%、洗碗粉 13%、Persil／ARIEL 大包裝 13–18%
-- 主文不放連結、貨架置頂、選一個 Topic（本篇 #洗碗機）
-- 主頁簡介仍是「幫你比」，與居家清潔定位不一致（等老闆）
-
-## 明日一個調整
-下個工作日海巡補回每天 8 則（洗碗／洗衣求推薦串），T+48 重讀本篇決定洗碗線第二篇寫法。</pre></details><details><summary>海巡日誌 2026-10-23</summary><pre># bunnybee.vs 海巡日誌｜2026-10-23（五）
-
-**今日 0／8。**
-
-## 更正：Replies 分頁實際紀錄（21:37 讀）
-| 推定日期 | 回覆給 | 原文 | 我們的第一行 | 連結 |
-|---|---|---|---|---|
-| 10-21 | @2145wallylife（洗碗精文） | https://www.threads.com/@2145wallylife/post/DeQ0PewlfdO | 也可以看 ecostore 洗碗精，成分標示寫得很清楚 | ecostore 洗碗精 |
-| 10-21 | @ttiyo_1114（好聞洗衣精求推薦） | https://www.threads.com/@ttiyo_1114/post/DeoyxC9j0Kk | 想要衣服好聞，先確認衣服有乾透… | Persil |
-| 10-21 | @2zccyl（洗衣球求推薦） | https://www.threads.com/@2zccyl/post/DelZrCNESbn | 常室內晾的話，比起換香味，衣服間隔一個拳頭… | ARIEL 4D |
-
-另有 10-17、10-18 各 1 則（內容未讀）。頁面只顯示「2d／5d／6d」，日期為推定。10-21、10-22 日誌寫 0 則有誤，以此為準。</pre></details><details><summary>週復盤 2026-10-19</summary><pre># bunnybee.vs 週復盤｜2026-10-19（週一｜給老闆）
-
-涵蓋：10-13（二）～10-19（一）｜帳號 @bunnybee.vs｜佣金 仕修｜10-09 起發文／海巡暫停延續。21:40 讀主頁確認最新貼文仍是 10/08。
+涵蓋：10-20（一）～10-26（一）｜@bunnybee.vs｜佣金 仕修
 
 ## 1. 本週發文列表與數據
-| 日期 | 主文 | 連結留言 | 海巡 | 幕後 |
-|---|---|---|---|---|
-| 10-13（二） | 0 | 0 | 0 | 鎖日更節奏；AI 短影音管線就緒；Finish 30s 樣片待審 |
-| 10-14（三） | 0 | 0 | 0 | 高流量選品調查；後台未登入，0 筆 |
-| 10-15（四） | 0 | 0 | 0 | 無新產出（登入卡點） |
-| 10-16（五） | 0 | 0 | 0 | 無新產出（登入卡點） |
-| 10-17（六） | 0 | 0 | 0 | 週末，無記錄 |
-| 10-18（日） | 0 | 0 | 0 | **後台登入解了**：讀實單、產 10 條帶 sub_id 短連結；居家清潔品牌分潤盤點；爬文網友心得 |
-| 10-19（一） | 0 | 0 | 0 | 居家清潔 3 篇（cc 爬文版＋攻略版）代理審完，**等老闆核准** |
+| 日期 | 主文 | 海巡 | 重點 |
+|---|---|---|---|
+| 10-20 | 0 | 0 | 居家清潔 3 篇等核准 |
+| 10-21 | 0 | 3 | Replies 事後確認有 3 則洗碗／洗衣求推薦海巡 |
+| 10-22 | 0 | 0 | 等核准 |
+| 10-23 | 1（洗碗錠第一人稱，DezbXF7o7_I） | 0 | 14 天試行核准；T+21h 10 瀏覽 |
+| 10-24 | 1（寢具文，De3is6EI5KM） | 0 | 人設改 v2「租屋居家整理員」；T+21h 4 瀏覽；後台 BS01、QL02 各 1 點擊 |
+| 10-25 | 1（窗簾冷知識，De50EI5km8L） | 2 | 改名「bunnybee｜租屋收納整理」、簡介改短 |
+| 10-26 | 3（快速測：痛點／數字／反常識） | 0 | 12:00 篇 T+9h 24 瀏覽 |
 
-合計：主文 **0**｜海巡 **0**｜新短連結 **10（雨衣／電熱毯／冬被等，10-18）＋居家清潔貨架 15 條**｜主頁 0 followers、9,458 recent views（主頁顯示值）
-後台實數（9/17～10/17）：**7 單、預估分潤 NT$247.26**；10/11–10/17 點擊 5 次。
+合計：主文 **6**｜海巡 **5**｜主頁 0 followers，recent views 9,476 → 9,752｜點擊（後台有讀到的天）共 2，成交 0（本週讀到的範圍內）。
 
 ## 2. 相對好／差
-- **好**：ecostore 洗碗粉（慎康官方店，13%）3 單 $227.86，占 92%，時間對上 9 月洗碗粉海巡 → 「高佣官方店清潔耗材＋海巡回求推薦串」是目前唯一證實會成交的組合
-- **差**：其他成交都是 1% 低佣品（奶瓶機凝膠、捕蚊燈啟動器、衣服），每單 $1–9
-- **修正**：10-09 復盤寫的「0 佣金」不成立，當時只是看不到後台
-- **定位**：老闆 10-18 判斷「幫你比」跨品類太散；改專注居家清潔，跟本週情報「主題一致性」方向相同
+- **好**：租屋過冬店家清單（痛點開頭）9 小時 24 瀏覽，比洗碗錠、寢具文同時段都高；寢具／收納鏈第一次有點擊
+- **差**：耗材海巡連 4 天 0 合格串，10/25 的 2 則回覆 0 互動 → 清潔耗材求推薦串量太少
+- **整體**：主文自然推送仍很低（單篇個位數到二十幾），0 followers 沒變
 
 ## 3. 連結／選品問題
-- 舊鏈全無 sub_id，9 月成交只能推定歸因；10-18 起新鏈帶 sub_id（thtxt／代碼／日期）
-- 同品牌要從官方店產鏈（官方店 17–25%、蝦皮直營約 10.5%、代購約 1%）
-- 10-18 產的雨衣／電熱毯／冬被 10 條鏈與「專注居家清潔」不同線，先留庫不主推
-- 已知 broken／suspect 鏈（寶寶鏈、Antoine、除濕）持續隔離
-- 主頁簡介仍寫「幫你比」，跟居家清潔定位不一致（要不要改等老闆）
+- 後台滑塊驗證擋住 sub_id 產鏈，快速測三篇共用舊鏈，點擊歸不到篇
+- 蝦皮商品頁要登入才看得到價格，置頂留言寫「價格以商品頁為準」
+- 8/31 條款：同篇不放其他電商連結、只用後台短連結、不濫發
 
 ## 4. 下週三個方向（預設執行 #1，除非你否決）
-1. **居家清潔 3 篇核准後依序發，先發「洗碗機耗材怎麼挑」** ← **預設**：finish 全系列 25%、ecostore 洗碗精／噴霧 25%，正好接上唯一證實會成交的洗碗線；主文不放連結、貨架置頂、選 Topic；同日恢復洗碗求推薦串海巡（每日 8）
-2. **洗衣線（室內晾衣酸臭）**：Threads 洗衣討論度最高，掛 Persil／ARIEL 大包裝 13–18%；48h 看點擊報告決定加碼
-3. **雙11 洗碗機囤貨清單**（11/4–11/10 發一次提醒，吃 7 天歸因窗）：finish／ecostore 官方店大包裝，標核價日、不寫最低價
+1. **快速測照跑＋補 sub_id** ← **預設**：每天 3 篇，開頭測完 5～6 種（問句、租屋情境、網友經驗）後換品類；10/28 起 48 小時砍／加碼
+2. **海巡改收納／租屋／寢具求推薦串**（10/27 起，時效 12 小時、上限 12、附連結不過半），因為耗材串幾乎沒有
+3. **雙11 囤貨清單 10/28 置頂**（稿已在 `聯盟產文/雙11囤貨清單-稿-2026-10-26.md`），標核價日、不寫最低價
 
-節奏：核准後每天 1～2 篇居家清潔，不再硬撐三窗；週五復盤用 sub_id 讀點擊報告。
+## 5. 情報
+詳 `bunnybee.vs-聯盟情報-2026-10-26.md`。
+</pre></details><details><summary>聯盟情報</summary><pre># bunnybee.vs 聯盟情報｜2026-10-26
 
-**要你拍板**：① 核准居家清潔 3 篇（爬文版）② 恢復海巡（先洗碗／洗衣求推薦串）③ 主頁簡介是否從「幫你比」改成居家清潔定位
+來源：本週自家調查 `聯盟產文/蝦皮分潤-更多資源-2026-10-25.md`、`蝦皮聯盟-學習社群調查-2026-10-24.md`（實際打開連結讀過；他人收入都是自稱，未驗證）。
 
-## 5. 情報（§8）＋下週採用
-詳 `bunnybee.vs-聯盟情報-2026-10-19.md`。直接採用：
-1. 居家清潔單一主題＋每篇選一個貼切 Topic，復盤加「非追蹤者比例」
-2. 週五復盤在後台讀 sub_id 點擊報告，判斷哪篇、哪個品帶點擊
-</pre></details><details><summary>聯盟情報 2026-10-19</summary><pre># bunnybee.vs 聯盟情報｜2026-10-19（週一｜≤1 頁）
+## 學到
+1. 蝦皮 2026/08/31 條款三條紅線：同篇不放其他電商連結、只有後台短連結拿得到賣家加碼、禁止濫發沒內容的連結。
+2. 後台「自定義推廣」Sub_id 最多 5 組，可以分開追主文、置頂留言、海巡。
+3. 隔日到貨商品分潤 3%，高於基本 1%；後台有品牌加碼與熱賣前 5 名，可直接拿來選收納品。
+4. 同利基參考：vocus「Chloe小窩」租屋收納 × 分潤文章。
+5. 避開：教「偽裝連結」的課程，跟條款衝突、有停權風險。
 
-掃描範圍：繁中 Threads 演算法／經營整理、蝦皮分潤規則（官方賣家幫助中心＋第三方教學）。只讀公開頁。數字皆為來源自述，未自行驗證，**不寫進對外文當保證**。
-
-## 學到什麼
-1. **主題一致比追熱點重要**（熱點 hotspot、黃志弘 leoaido，2026/10 更新）：Threads 推薦以「使用者對什麼主題有興趣」為核心；帳號主題穩定，推薦系統比較好判斷要推給誰。→ 正好支持 10-18 老闆的「專注居家清潔」決定，不再跨品類「幫你比」。
-2. **Topic 主題標籤＋台灣在地社群**（Meta 2026/6 公告，TechNews 轉述）：Communities 正式上線，台灣首波支援母語標籤；Meta 自述加 Topic 的貼文瀏覽較多（未公布倍數）。→ 發文時選一個貼切的 Topic（例如居家清潔／洗碗機），不要亂塞。
-3. **Insights 改版看得到非追蹤者觸及**（Threads 負責人 2026/9/8 宣布，leoaido 整理）：每篇可看觸及來自追蹤者或非追蹤者。→ 復盤加一欄「非追蹤者比例」，判斷是否被推出圈。
-4. **互動誘餌會被降推薦**（Mosseri 2024/10 發言，leoaido 整理）：「留言 XX 送你」類 CTA 可能被降。→ 我們的「型號放留言」是告知、不是要求留言換連結，可保留；不要改成「留言+1 私訊你」。
-5. **蝦皮分潤上限依管道不同**（aiveloflow 第三方整理，標「官方說明 2026-10-08 讀取」，我們未在後台核實）：社群媒體每單上限 NT$500、短影音／直播 NT$100；短影音基本 0.5%。→ finish 這類每單 137–350 元的品，走 Threads 外部連結比走蝦皮短影音划算；短影音優先挑每單 ≤100 也不虧的品。
-6. **蝦皮雙11 時程**（蝦皮官方部落格）：10/11–11/13 滿千折 300＋品牌 6 折起，11/11 當日全站免運；歸因 7 天（賣家幫助中心）。→ 11/4–11/10 要有一次提醒清單。
-
-## 下週怎麼用（會直接做）
-| # | 採用 | 怎麼嵌進節奏 |
-|---|---|---|
-| A | **居家清潔單一主題＋每篇選 Topic** | 已送審的 3 篇（洗碗機耗材、室內晾衣酸臭、洗碗機有味道）核准後發，發文時選一個貼切 Topic；復盤記非追蹤者比例 |
-| B | **sub_id 讀點擊報告** | 10-18 起新鏈已帶 sub_id（thtxt／代碼／日期）；週五復盤在 mini 後台讀點擊報告，看哪篇、哪個品有點擊 |
-
-參考：[Threads 演算法 2026（熱點）](https://www.hotspot.com.tw/articles-detail/threads-algorithm-guide/)；[Threads 經營實戰指南（黃志弘）](https://leoaido.com/threads-guide/)；[Threads 5 億月活新功能（TechNews）](https://technews.tw/2026/06/17/new-features-to-celebrate-500-million-monthly-users-on-threads/)；[蝦皮聯盟行銷服務（賣家幫助中心）](https://seller.shopee.tw/edu/article/16658)；[蝦皮分潤教學 2026（VeloFlow）](https://aiveloflow.com/zh-tw/guides/shopee-affiliate-program-guide)；[蝦皮 11.11 活動](https://shopee.tw/blog/11-11-sale/)。
+## 下週用法
+- 用 Sub_id 欄位分「主文篇次／置頂／海巡」，快速測每篇一組，48 小時用點擊判斷。
+- 選品先看後台品牌加碼的收納／寢具品，優先官方店與隔日到貨品。
+公開文案不寫任何收入保證或「最低價」。
 </pre></details></div>
-<footer>更新：2026-10-23 21:40（台北）｜固定網址 https://hugoyuanco-design.github.io/bunnybee-dashboard/（每日覆寫）｜數字取自 /workspace 復盤檔與後台紀錄，無資料者不推估</footer>
 </div></body></html>
